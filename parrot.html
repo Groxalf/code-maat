@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Parrot</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+</head>
+<style>
+    .file {
+        margin-left: 10px;
+        margin-top: 10px;
+        color: white;
+        font-family: 'Lato', sans-serif;
+        letter-spacing: 0.05rem;
+    }
+
+    .card {
+        background-color: #00b4A0;
+        border: 0.33rem solid white;
+        border-radius: 1rem;
+    }
+
+    .card div {
+        word-break: break-word;
+    }
+
+    path {
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+    div.tooltip {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        padding: 0.75rem 1rem;
+        font-family: 'Lato', sans-serif;
+        font-size: 0.9rem;
+        font-weight: bold;
+        letter-spacing: 0.075rem;
+        background: #26a2ff;
+        border: none;
+        border-radius: 0.75rem;
+    }
+    div.tooltip p {
+        margin: 0 0 0.25rem;
+    }
+</style>
+<body onload="draw()">
+<div id="graph"></div>
+<script>
+    function draw() {
+        const data = [
+            {file: 'code', revisions: undefined, parent: ''},
+            {file: 'ServletBusquedaPisos.java', revisions: 488, parent: 'code'},
+            {file: 'listing.jsp', revisions: 453, parent: 'code'},
+            {file: 'ServletBusquedaCoches.java', revisions: 342, parent: 'code'},
+            {file: 'ServletBusquedaTrabajo.java', revisions: 292, parent: 'code'},
+            {file: 'detail.jsp', revisions: 194, parent: 'code'},
+            {file: 'ConstructorAnunciosFactory.java', revisions: 149, parent: 'code'},
+            {file: 'RedireccionDetalle.java', revisions: 130, parent: 'code'},
+            {file: 'clientTrackings.jsp', revisions: 126, parent: 'code'},
+            {file: 'listing.jsp', revisions: 111, parent: 'code'},
+            {file: 'mobileAd.jsp', revisions: 110, parent: 'code'},
+            {file: 'ParticularidadesPV.java', revisions: 83, parent: 'code'},
+            {file: 'adsList.jsp', revisions: 83, parent: 'code'},
+            {file: 'FiltroI18n.java', revisions: 79, parent: 'code'},
+            {file: 'index_newMSE.jsp', revisions: 71, parent: 'code'},
+            {file: 'adPublished.jsp', revisions: 70, parent: 'code'},
+            {file: 'detail.jsp', revisions: 64, parent: 'code'},
+            {file: 'metas.jsp', revisions: 64, parent: 'code'},
+            {file: 'indexNew.jsp', revisions: 62, parent: 'code'},
+            {file: 'index.jsp', revisions: 62, parent: 'code'},
+            {file: 'ServletGestionAlertas.java', revisions: 59, parent: 'code'},
+            {file: 'FrasesAleatoriasMSE.java', revisions: 59, parent: 'code'},
+            {file: 'googleAd.jsp', revisions: 55, parent: 'code'},
+            {file: 'adsListContent.jsp', revisions: 53, parent: 'code'},
+            {file: 'redirectAds.jsp', revisions: 52, parent: 'code'},
+            {file: 'analyticsManager.jsp', revisions: 51, parent: 'code'},
+            {file: 'ServletHome.java', revisions: 50, parent: 'code'},
+            {file: 'ServletServicios.java', revisions: 50, parent: 'code'},
+            {file: 'topAdsStatistics.jsp', revisions: 49, parent: 'code'},
+            {file: 'frame.jsp', revisions: 49, parent: 'code'},
+            {file: 'web.xml', revisions: 48, parent: 'code'},
+            {file: 'menu.jsp', revisions: 47, parent: 'code'},
+            {file: 'topAdsDetail.jsp', revisions: 47, parent: 'code'},
+            {file: 'PPVAB.java', revisions: 46, parent: 'code'},
+            {file: 'headerWithSearch.jsp', revisions: 45, parent: 'code'},
+            {file: 'morePhrases.jsp', revisions: 45, parent: 'code'},
+            {file: 'indexDesktopNew.jsp', revisions: 44, parent: 'code'},
+            {file: 'login.jsp', revisions: 44, parent: 'code'},
+            {file: 'frasesVariablesTablaMulti.jsp', revisions: 42, parent: 'code'},
+            {file: 'ServletInicializador.java', revisions: 41, parent: 'code'},
+            {file: 'TextLinksManager.java', revisions: 40, parent: 'code'},
+            {file: 'MobileSearchResponse.java', revisions: 40, parent: 'code'},
+            {file: 'ServletAuxData.java', revisions: 39, parent: 'code'},
+            {file: 'rightSide.jsp', revisions: 38, parent: 'code'},
+            {file: 'AyudanteFooter.java', revisions: 35, parent: 'code'},
+            {file: 'ServletAnunciosSimilares.java', revisions: 35, parent: 'code'},
+            {file: 'topAdsSponsoredBanner.jsp', revisions: 33, parent: 'code'},
+            {file: 'topLocations.jsp', revisions: 32, parent: 'code'},
+            {file: 'AyudantePublicaTuAnuncio.java', revisions: 32, parent: 'code'},
+            {file: 'MobileConfigurationResponse.java', revisions: 31, parent: 'code'}];
+        const margin = {top: 10, right: 10, bottom: 10, left: 10},
+            width = 1080 - margin.left - margin.right,
+            height = 720 - margin.top - margin.bottom;
+
+
+        const svg = d3.select("#graph")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        const root = d3.stratify()
+            .id(d => d.file)
+            .parentId(d => d.parent)
+            (data);
+        root.sum(d => +d.revisions);
+
+
+        d3.treemap()
+            .size([width, height])
+            .padding(0)
+            (root);
+
+        const div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        let groups = svg
+            .selectAll("text")
+            .data(root.leaves())
+            .enter()
+            .append("svg")
+            .attr('x', d => d.x0)
+            .attr('y', d => d.y0)
+            .attr('width', d => d.x1 - d.x0)
+            .attr('height', d => d.y1 - d.y0)
+            .on("mouseover", d => {
+                div.transition()
+                    .duration(200)
+                    .style("opacity", 1);
+                div.html("<p>" + d.data.file + "</p>" + "<p>" + d.data.revisions + "</p>")
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => {
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0)
+            });
+
+        groups
+            .append("foreignObject")
+            .attr('width', d => d.x1 - d.x0)
+            .attr('height', d => d.y1 - d.y0)
+            .attr('class', 'card')
+            .append('xhtml:div')
+            .append("div")
+            .attr("class", "file")
+            .append("p")
+            .html(d => d.data.file)
+    }
+</script>
+</body>
+</html>

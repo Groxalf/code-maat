@@ -19,3 +19,4 @@ test_data.txt
 .idea/
 *.iml
 .nrepl-port
+node_modules/

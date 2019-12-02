@@ -1,0 +1,24 @@
+{
+  "name": "code-quality",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node frontend/app.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Groxalf/code-maat.git"
+  },
+  "dependencies": {
+    "@types/d3": "^5.7.2",
+    "csvtojson": "2.0.10",
+    "d3": "^5.14.2",
+    "jsdom": "^15.2.1"
+  },
+  "devDependencies": {
+    "@types/csvtojson": "^1.1.5",
+    "ts-node": "^8.5.2",
+    "typescript": "3.7.2"
+  }
+}
