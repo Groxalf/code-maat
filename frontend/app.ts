@@ -5,10 +5,9 @@ const fs = require("fs");
 
 async function start() {
     try {
-        const data = (await retrieveRevision({minRevisions: 30})).map(it => Object.assign(it, {parent:"code"}));
+        const data = (await retrieveRevision({minRevisions: 30}));
         const dom = new JSDOM();
         let body = dom.window.document.body;
-        data.unshift({parent: "", file: "code", revisions: undefined});
 
         const vWidth = 1500;
         const vHeight = 768;
@@ -78,7 +77,12 @@ function retrieveRevision({minRevisions = 0}: { minRevisions: number }): Promise
     return new Promise((resolve => {
         csv()
             .fromFile("results/revision.csv")
-            .then(json => json.map(it => ({file: it.entity.substr(it.entity.lastIndexOf("/") + 1, it.entity.length), revisions: Number.parseInt(it["n-revs"])})))
+            .then(json => json.map(it => (
+                {
+                    file: it.entity.substr(it.entity.lastIndexOf("/") + 1, it.entity.length),
+                    path: it.entity,
+                    revisions: Number.parseInt(it["n-revs"])
+                })))
             .then(revisions => revisions.filter(revision => revision.revisions > minRevisions))
             .then(resolve)
     }));

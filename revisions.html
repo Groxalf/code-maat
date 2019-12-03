@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Parrot</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+</head>
+<style>
+    .file {
+        margin-left: 10px;
+        margin-top: 10px;
+        color: white;
+        font-family: 'Lato', sans-serif;
+        letter-spacing: 0.05rem;
+    }
+
+    .card {
+        background-color: #00b4A0;
+        border: 0.33rem solid white;
+        border-radius: 1rem;
+    }
+
+    .card div {
+        word-break: break-word;
+    }
+
+    path {
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+    div.tooltip {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        padding: 0.75rem 1rem;
+        font-family: 'Lato', sans-serif;
+        font-size: 0.9rem;
+        font-weight: bold;
+        letter-spacing: 0.075rem;
+        background: #26a2ff;
+        border: none;
+        border-radius: 0.75rem;
+    }
+    div.tooltip p {
+        margin: 0 0 0.25rem;
+    }
+</style>
+<body onload="draw()">
+<div id="graph"></div>
+<script>
+    function draw() {
+        const data = [
+            {file: 'code', revisions: undefined, parent: ''},
+            { file: 'ServletBusquedaPisos.java',path: 'src/main/java/com/mitula/portal/buscador/pisos/ServletBusquedaPisos.java',revisions: 488,parent: 'code' },
+            { file: 'listing.jsp',path: 'jsp/listing/listing.jsp',revisions: 453,parent: 'code' },
+            { file: 'ServletBusquedaCoches.java',path: 'src/main/java/com/mitula/portal/buscador/coches/ServletBusquedaCoches.java',revisions: 342,parent: 'code' },
+            { file: 'ServletBusquedaTrabajo.java',path: 'src/main/java/com/mitula/portal/buscador/trabajo/ServletBusquedaTrabajo.java',revisions: 292,parent: 'code' },
+            { file: 'detail.jsp',path: 'jsp/detail/detail.jsp',revisions: 194,parent: 'code' },
+            { file: 'ConstructorAnunciosFactory.java',path: 'src/main/java/com/mitula/portal/ayudantesIndex/ConstructorAnunciosFactory.java',revisions: 149,parent: 'code' },
+            { file: 'RedireccionDetalle.java',path: 'src/main/java/com/mitula/portal/redireccion/RedireccionDetalle.java',revisions: 130,parent: 'code' },
+            { file: 'clientTrackings.jsp',path: 'jsp/tracking/clientTrackings.jsp',revisions: 126,parent: 'code' },
+            { file: 'listing.jsp',path: 'src/main/webapp/jsp/listing/listing.jsp',revisions: 111,parent: 'code' },
+            { file: 'mobileAd.jsp',path: 'jsp/include/serp/mobileAd.jsp',revisions: 110,parent: 'code' },
+            { file: 'ParticularidadesPV.java',path: 'src/main/java/com/mitula/portal/particularidadesPaisVertical/ParticularidadesPV.java',revisions: 83,parent: 'code' },
+            { file: 'adsList.jsp',path: 'jsp/include/serp/adsList.jsp',revisions: 83,parent: 'code' },
+            { file: 'FiltroI18n.java',path: 'src/main/java/com/mitula/portal/general/i18n/FiltroI18n.java',revisions: 79,parent: 'code' },
+            { file: 'index_newMSE.jsp',path: 'index_newMSE.jsp',revisions: 71,parent: 'code' },
+            { file: 'adPublished.jsp',path: 'jsp/include/adPublished/adPublished.jsp',revisions: 70,parent: 'code' },
+            { file: 'detail.jsp',path: 'src/main/webapp/jsp/detail/detail.jsp',revisions: 64,parent: 'code' },
+            { file: 'metas.jsp',path: 'jsp/metas/metas.jsp',revisions: 64,parent: 'code' },
+            { file: 'indexNew.jsp',path: 'indexNew.jsp',revisions: 62,parent: 'code' },
+            { file: 'index.jsp',path: 'index.jsp',revisions: 62,parent: 'code' },
+            { file: 'ServletGestionAlertas.java',path: 'src/main/java/com/mitula/portal/alertas/ServletGestionAlertas.java',revisions: 59,parent: 'code' },
+            { file: 'FrasesAleatoriasMSE.java',path: 'src/main/java/com/mitula/portal/buscador/frases/FrasesAleatoriasMSE.java',revisions: 59,parent: 'code' },
+            { file: 'googleAd.jsp',path: 'jsp/include/adsense/googleAd.jsp',revisions: 55,parent: 'code' },
+            { file: 'adsListContent.jsp',path: 'jsp/include/serp/adsListContent.jsp',revisions: 53,parent: 'code' },
+            { file: 'redirectAds.jsp',path: 'jsp/redirectAds.jsp',revisions: 52,parent: 'code' },
+            { file: 'analyticsManager.jsp',path: 'jsp/analytics/analyticsManager.jsp',revisions: 51,parent: 'code' },
+            { file: 'ServletHome.java',path: 'src/main/java/com/mitula/portal/general/i18n/ServletHome.java',revisions: 50,parent: 'code' },
+            { file: 'ServletServicios.java',path: 'src/main/java/com/mitula/portal/servicios/ServletServicios.java',revisions: 50,parent: 'code' },
+            { file: 'topAdsStatistics.jsp',path: 'jsp/navigation/topAdsStatistics.jsp',revisions: 49,parent: 'code' },
+            { file: 'frame.jsp',path: 'jsp/detail/frame.jsp',revisions: 49,parent: 'code' },
+            { file: 'web.xml',path: 'web-conf/web.xml',revisions: 48,parent: 'code' },
+            { file: 'menu.jsp',path: 'jsp/include/menu/menu.jsp',revisions: 47,parent: 'code' },
+            { file: 'topAdsDetail.jsp',path: 'jsp/navigation/topAdsDetail.jsp',revisions: 47,parent: 'code' },
+            { file: 'PPVAB.java',path: 'src/main/java/com/mitula/portal/particularidadesPaisVertical/PPVAB.java',revisions: 46,parent: 'code' },
+            { file: 'headerWithSearch.jsp',path: 'jsp/include/serp/headerWithSearch.jsp',revisions: 45,parent: 'code' },
+            { file: 'morePhrases.jsp',path: 'jsp/include/serp/morePhrases.jsp',revisions: 45,parent: 'code' },
+            { file: 'indexDesktopNew.jsp',path: 'indexDesktopNew.jsp',revisions: 44,parent: 'code' },
+            { file: 'login.jsp',path: 'jsp/include/menu/login.jsp',revisions: 44,parent: 'code' },
+            { file: 'frasesVariablesTablaMulti.jsp',path: 'jsp/include/home/phrases/frasesVariablesTablaMulti.jsp',revisions: 42,parent: 'code' },
+            { file: 'ServletInicializador.java',path: 'src/main/java/com/mitula/portal/inicializar/ServletInicializador.java',revisions: 41,parent: 'code' },
+            { file: 'TextLinksManager.java',path: 'src/main/java/com/mitula/procesos/textLinks/TextLinksManager.java',revisions: 40,parent: 'code' },
+            { file: 'MobileSearchResponse.java',path: 'src/main/java/com/mitula/mobile/v2/services/search/MobileSearchResponse.java',revisions: 40,parent: 'code' },
+            { file: 'ServletAuxData.java',path: 'src/main/java/com/mitula/portal/auxData/ServletAuxData.java',revisions: 39,parent: 'code' },
+            { file: 'rightSide.jsp',path: 'jsp/include/other/rightSide.jsp',revisions: 38,parent: 'code' },
+            { file: 'AyudanteFooter.java',path: 'src/main/java/com/mitula/portal/ayudantesIndex/AyudanteFooter.java',revisions: 35,parent: 'code' },
+            { file: 'ServletAnunciosSimilares.java',path: 'src/main/java/com/mitula/portal/buscador/ServletAnunciosSimilares.java',revisions: 35,parent: 'code' },
+            { file: 'topAdsSponsoredBanner.jsp',path: 'jsp/navigation/topAdsSponsoredBanner.jsp',revisions: 33,parent: 'code' },
+            { file: 'topLocations.jsp',path: 'jsp/include/home/topLocations.jsp',revisions: 32,parent: 'code' },
+            { file: 'AyudantePublicaTuAnuncio.java',path: 'src/main/java/com/mitula/portal/postYourAd/AyudantePublicaTuAnuncio.java',revisions: 32,parent: 'code' },
+            { file: 'MobileConfigurationResponse.java',path: 'src/main/java/com/mitula/mobile/v2/services/configuration/MobileConfigurationResponse.java',revisions: 31,parent: 'code' } ];
+        const margin = {top: 10, right: 10, bottom: 10, left: 10},
+            width = 1920 - margin.left - margin.right,
+            height = 892 - margin.top - margin.bottom;
+
+        const svg = d3.select("#graph")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")")
+
+            .on("mouseout", () => {
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0)
+            });
+
+        const root = d3.stratify()
+            .id(d => d.file)
+            .parentId(d => d.parent)
+            (data);
+        root.sum(d => +d.revisions);
+
+
+        d3.treemap()
+            .size([width, height])
+            .padding(0)
+            (root);
+
+        const div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        let groups = svg
+            .selectAll("text")
+            .data(root.leaves())
+            .enter()
+            .append("svg")
+            .attr('x', d => d.x0)
+            .attr('y', d => d.y0)
+            .attr('width', d => d.x1 - d.x0)
+            .attr('height', d => d.y1 - d.y0)
+            .on("mouseover", d => {
+                div.transition()
+                    .duration(200)
+                    .style("opacity", 1);
+                div.html("<p>" + d.data.file + "</p>" + "<p>"+ d.data.path + "</p>" + "<p>" + d.data.revisions + "</p>")
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+            });
+
+        groups
+            .append("foreignObject")
+            .attr('width', d => d.x1 - d.x0)
+            .attr('height', d => d.y1 - d.y0)
+            .attr('class', 'card')
+            .append('xhtml:div')
+            .append("div")
+            .attr("class", "file")
+            .append("p")
+            .html(d => d.data.file)
+    }
+</script>
+</body>
+</html>
