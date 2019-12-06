@@ -23,7 +23,7 @@
             .radius(d => d.y)
             .angle(d => d.x);
 
-        const width = 720;
+        const width = 350;
 
         const radius = width / 2;
         const tree = d3.cluster()
@@ -76,7 +76,7 @@
 
         svg.append("g")
             .attr("font-family", "sans-serif")
-            .attr("font-size", 10)
+            .attr("font-size", 3)
             .selectAll("g")
             .data(root.leaves())
             .join("g")
