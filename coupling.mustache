@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Coupling</title>
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+    <style>
+        .node {
+            font: 10px sans-serif;
+        }
+
+        .link {
+            stroke: steelblue;
+            stroke-opacity: .4;
+            fill: none;
+        }
+    </style>
+</head>
+<body onload="draw()">
+<div id="graph"></div>
+
+<script>
+    const classes = JSON.parse("{{{classes}}}");
+
+    function draw() {
+        const margin = {top: 10, right: 140, bottom: 10, left: -400},
+            width = 960 - margin.left - margin.right,
+            height = 1280 - margin.top - margin.bottom;
+
+        const cluster = d3.layout.cluster()
+            .size([height, width])
+            .sort((a, b) => d3.ascending(a.name, b.name))
+            .value(d => d.size);
+
+        const bundle = d3.layout.bundle();
+
+        const line = d3.svg.line()
+            .interpolate("bundle")
+            .tension(.85)
+            .x(d => d.y)
+            .y(d => d.x);
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        const packages = {
+            root: function (classes) {
+                const map = {};
+
+                function find(name, data) {
+                    let node = map[name], i;
+                    if (!node) {
+                        node = map[name] = data || {name: name, children: []};
+                        if (name.length) {
+                            node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
+                            node.parent.children.push(node);
+                            node.key = name.substring(i + 1);
+                        }
+                    }
+                    return node;
+                }
+
+                classes.forEach(d => find(d.name, d));
+
+                return map[""];
+            },
+
+            imports: (nodes) => {
+                const map = {}, imports = [];
+
+                nodes.forEach(d => map[d.name] = d);
+
+                nodes.forEach(d => {
+                    if (d.imports) {
+                        d.imports.forEach(i => imports.push({source: map[d.name], target: map[i]}));
+                    }
+                });
+
+                return imports;
+            }
+        };
+
+        const nodes = cluster.nodes(packages.root(classes)),
+            links = packages.imports(nodes);
+
+        svg.selectAll(".link")
+            .data(bundle(links))
+            .enter().append("path")
+            .attr("class", "link")
+            .attr("d", line);
+
+        svg.selectAll(".node")
+            .data(nodes.filter(n => !n.children))
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
+            .append("text")
+            .attr("dx", 8)
+            .attr("dy", ".31em")
+            .text(d => d.key);
+
+        d3.select(self.frameElement).style("height", height + margin.top + margin.bottom + "px");
+    }
+
+</script>
+</body>
+</html>

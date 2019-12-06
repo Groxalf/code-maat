@@ -12,9 +12,13 @@
   },
   "dependencies": {
     "@types/d3": "^5.7.2",
+    "@types/lodash": "^4.14.149",
+    "@types/mustache": "^0.8.32",
     "csvtojson": "2.0.10",
     "d3": "^5.14.2",
-    "jsdom": "^15.2.1"
+    "jsdom": "^15.2.1",
+    "lodash": "^4.17.15",
+    "mustache": "^3.1.0"
   },
   "devDependencies": {
     "@types/csvtojson": "^1.1.5",
