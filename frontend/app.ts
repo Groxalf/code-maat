@@ -1,22 +1,23 @@
 import * as fs from "fs";
+import mustacheExpress = require("mustache-express");
 
 const csv = require("csvtojson");
 const _ = require('lodash');
 const Mustache = require('mustache');
+const express = require('express');
 
-async function start() {
-    try {
-        fs.readFile("coupling.mustache", async (err, content) => {
-            let value = await retrieveCoupledClasses();
-            const html = Mustache.render(content.toString('utf-8'), {classes: JSON.stringify(value)});
-            fs.writeFile("coupling.html", html, () => {});
-        });
+const PORT = 8001;
 
-    } catch (e) {
-        console.log(e)
-    }
+const app = express();
+app.engine('mustache', mustacheExpress());
+app.set('view engine', 'mustache');
+app.set('views', __dirname + '/templates');
 
-}
+app.get('/coupling', async (req, res) => {
+    res.render("coupling.mustache", {classes: JSON.stringify(await retrieveCoupledClasses())})
+});
+
+app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
 
 function retrieveAbsoluteChurn(): Promise<Array<{ date: string, added: string, deleted: string }>> {
     return new Promise((resolve => {
@@ -66,5 +67,3 @@ function retrieveCoupledClasses(): Promise<Array<{ file: string, coupled: Array<
             .then(resolve)
     })
 }
-
-start();
