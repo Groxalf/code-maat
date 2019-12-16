@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Coupling</title>
-    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script src="//d3js.org/d3.v5.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
     <style>
         .node {
@@ -21,91 +21,115 @@
 <div id="graph"></div>
 
 <script>
-    const classes = JSON.parse("{{{classes}}}");
+    const classes = {{{classes}}};
 
     function draw() {
-        const margin = {top: 10, right: 140, bottom: 10, left: -400},
-            width = 960 - margin.left - margin.right,
-            height = 1280 - margin.top - margin.bottom;
+        const line = d3.lineRadial()
+                .curve(d3.curveBundle.beta(0.85))
+                .radius(d => d.y)
+                .angle(d => d.x);
+        const width = 350;
 
-        const cluster = d3.layout.cluster()
-            .size([height, width])
-            .sort((a, b) => d3.ascending(a.name, b.name))
-            .value(d => d.size);
+        const radius = width / 2;
 
-        const bundle = d3.layout.bundle();
+        const tree = d3.cluster()
+                .size([2 * Math.PI, radius - 100]);
+        const colornone = "#ccc";
 
-        const line = d3.svg.line()
-            .interpolate("bundle")
-            .tension(.85)
-            .x(d => d.y)
-            .y(d => d.x);
+        const colorout = "#f00";
+        const colorin = "#00f";
 
-        const svg = d3.select("body").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        function id(node) {
+            return `${node.parent ? id(node.parent) + "#" : ""}${node.data.file}`;
+        }
 
-        const packages = {
-            root: function (classes) {
-                const map = {};
+        function bilink(root) {
+            let leaves = root.leaves();
+            const map = new Map(leaves.map(d => [id(d), d]));
+            for (const d of root.leaves()) d.incoming = [], d.outgoing = d.data.coupled.map(i => [d, map.get("com" + "#" + i.file)]).filter(c => c[1] !== undefined);
+            for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
+            return root;
+        }
 
-                function find(name, data) {
-                    let node = map[name], i;
-                    if (!node) {
-                        node = map[name] = data || {name: name, children: []};
-                        if (name.length) {
-                            node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
-                            node.parent.children.push(node);
-                            node.key = name.substring(i + 1);
-                        }
-                    }
-                    return node;
+        function hierarchy(data, delimiter = "#") {
+            let root;
+            const map = new Map;
+            data.forEach(function find(data) {
+                const {file} = data;
+                if (map.has(file)) return map.get(file);
+                const i = file.lastIndexOf(delimiter);
+                map.set(file, data);
+                if (i >= 0) {
+                    find({file: file.substring(0, i), children: []}).children.push(data);
+                    data.file = file.substring(i + 1);
+                } else {
+                    root = data;
                 }
+                return data;
+            });
+            return root;
+        }
 
-                classes.forEach(d => find(d.name, d));
+        classes.forEach(d => d.file = "com#" + d.file);
 
-                return map[""];
-            },
+        const data = hierarchy(classes);
 
-            imports: (nodes) => {
-                const map = {}, imports = [];
+        const root = tree(bilink(d3.hierarchy(data)
+                .sort((a, b) => d3.ascending(a.height, b.height) || d3.ascending(a.data.file, b.data.file))));
 
-                nodes.forEach(d => map[d.name] = d);
+        const svg = d3.select("#graph").append("svg")
+                .attr("viewBox", [-width / 2, -width / 2, width, width]);
 
-                nodes.forEach(d => {
-                    if (d.imports) {
-                        d.imports.forEach(i => imports.push({source: map[d.name], target: map[i]}));
-                    }
+        svg.append("g")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", 3)
+                .selectAll("g")
+                .data(root.leaves())
+                .join("g")
+                .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
+                .append("text")
+                .attr("dy", "0.31em")
+                .attr("x", d => d.x < Math.PI ? 6 : -6)
+                .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+                .text(d => d.data.file)
+                .each(function (d) {
+                    d.text = this;
+                })
+                .on("mouseover", overed)
+                .on("mouseout", outed)
+                .call(text => text.append("title").text(d => `${id(d)} ${d.outgoing.length} outgoing ${d.incoming.length} incoming`));
+
+        const link = svg.append("g")
+                .attr("stroke", colornone)
+                .attr("fill", "none")
+                .selectAll("path")
+                .data(root.leaves().flatMap(leaf => leaf.outgoing))
+                .join("path")
+                .style("mix-blend-mode", "multiply")
+                .attr("d", ([i, o]) => line(i.path(o)))
+                .each(function (d) {
+                    d.path = this;
                 });
 
-                return imports;
-            }
-        };
+        function overed(d) {
+            link.style("mix-blend-mode", null);
+            d3.select(this).attr("font-weight", "bold");
+            d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", colorin).raise();
+            d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", colorin).attr("font-weight", "bold");
+            d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", colorout).raise();
+            d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", colorout).attr("font-weight", "bold");
+        }
 
-        const nodes = cluster.nodes(packages.root(classes)),
-            links = packages.imports(nodes);
-
-        svg.selectAll(".link")
-            .data(bundle(links))
-            .enter().append("path")
-            .attr("class", "link")
-            .attr("d", line);
-
-        svg.selectAll(".node")
-            .data(nodes.filter(n => !n.children))
-            .enter().append("g")
-            .attr("class", "node")
-            .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
-            .append("text")
-            .attr("dx", 8)
-            .attr("dy", ".31em")
-            .text(d => d.key);
-
-        d3.select(self.frameElement).style("height", height + margin.top + margin.bottom + "px");
+        function outed(d) {
+            link.style("mix-blend-mode", "multiply");
+            d3.select(this).attr("font-weight", null);
+            d3.selectAll(d.incoming.map(d => d.path)).attr("stroke", null);
+            d3.selectAll(d.incoming.map(([d]) => d.text)).attr("fill", null).attr("font-weight", null);
+            d3.selectAll(d.outgoing.map(d => d.path)).attr("stroke", null);
+            d3.selectAll(d.outgoing.map(([, d]) => d.text)).attr("fill", null).attr("font-weight", null);
+        }
     }
-
 </script>
 </body>
 </html>
