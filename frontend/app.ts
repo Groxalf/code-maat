@@ -1,9 +1,7 @@
-import * as fs from "fs";
 import mustacheExpress = require("mustache-express");
 
 const csv = require("csvtojson");
 const _ = require('lodash');
-const Mustache = require('mustache');
 const express = require('express');
 
 const PORT = 8001;
@@ -14,8 +12,20 @@ app.set('view engine', 'mustache');
 app.set('views', __dirname + '/templates');
 
 app.get('/coupling', async (req, res) => {
-    res.render("coupling.mustache", {classes: JSON.stringify(await retrieveCoupledClasses())})
+    res.render("coupling.mustache", {files: JSON.stringify(await retrieveCoupledClasses())})
 });
+
+app.get('/revisions', async (req, res) => {
+    async function parseRevisions() {
+        return [{
+            file: "parent",
+            parent: "",
+            revisions: 0
+        }, ...(await retrieveRevision({minRevisions: 20})).map(c => ({...c, parent: "parent"}))];
+    }
+    res.render("revisions.mustache", {files: JSON.stringify(await parseRevisions())})
+});
+
 
 app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
 

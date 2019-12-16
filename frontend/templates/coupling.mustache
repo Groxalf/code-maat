@@ -5,23 +5,12 @@
     <title>Coupling</title>
     <script src="//d3js.org/d3.v5.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
-    <style>
-        .node {
-            font: 10px sans-serif;
-        }
-
-        .link {
-            stroke: steelblue;
-            stroke-opacity: .4;
-            fill: none;
-        }
-    </style>
 </head>
 <body onload="draw()">
 <div id="graph"></div>
 
 <script>
-    const classes = {{{classes}}};
+    const files = {{{files}}};
 
     function draw() {
         const line = d3.lineRadial()
@@ -70,9 +59,9 @@
             return root;
         }
 
-        classes.forEach(d => d.file = "com#" + d.file);
+        files.forEach(d => d.file = "com#" + d.file);
 
-        const data = hierarchy(classes);
+        const data = hierarchy(files);
 
         const root = tree(bilink(d3.hierarchy(data)
                 .sort((a, b) => d3.ascending(a.height, b.height) || d3.ascending(a.data.file, b.data.file))));

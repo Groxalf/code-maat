@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Parrot</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+</head>
+<style>
+    .file {
+        margin-left: 10px;
+        margin-top: 10px;
+        color: white;
+        font-family: 'Lato', sans-serif;
+        letter-spacing: 0.05rem;
+    }
+
+    .card {
+        background-color: #00b4A0;
+        border: 0.33rem solid white;
+        border-radius: 1rem;
+    }
+
+    .card div {
+        word-break: break-word;
+    }
+
+    path {
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+    div.tooltip {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        padding: 0.75rem 1rem;
+        font-family: 'Lato', sans-serif;
+        font-size: 0.9rem;
+        font-weight: bold;
+        letter-spacing: 0.075rem;
+        background: #26a2ff;
+        border: none;
+        border-radius: 0.75rem;
+    }
+    div.tooltip p {
+        margin: 0 0 0.25rem;
+    }
+</style>
+<body onload="draw()">
+<div id="graph"></div>
+<script>
+    function draw() {
+        const files = {{{files}}};
+        const margin = {top: 10, right: 10, bottom: 10, left: 10},
+            width = 1920 - margin.left - margin.right,
+            height = 892 - margin.top - margin.bottom;
+
+        const svg = d3.select("#graph")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")")
+
+            .on("mouseout", () => {
+                div.transition()
+                    .duration(500)
+                    .style("opacity", 0)
+            });
+
+        const root = d3.stratify()
+            .id(d => d.file)
+            .parentId(d => d.parent)
+            (files);
+        root.sum(d => +d.revisions);
+
+
+        d3.treemap()
+            .size([width, height])
+            .padding(0)
+            (root);
+
+        const div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        let groups = svg
+            .selectAll("text")
+            .data(root.leaves())
+            .enter()
+            .append("svg")
+            .attr('x', d => d.x0)
+            .attr('y', d => d.y0)
+            .attr('width', d => d.x1 - d.x0)
+            .attr('height', d => d.y1 - d.y0)
+            .on("mouseover", d => {
+                div.transition()
+                    .duration(200)
+                    .style("opacity", 1);
+                div.html("<p>" + d.data.file + "</p>" + "<p>"+ d.data.path + "</p>" + "<p>" + d.data.revisions + "</p>")
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+            });
+
+        groups
+            .append("foreignObject")
+            .attr('width', d => d.x1 - d.x0)
+            .attr('height', d => d.y1 - d.y0)
+            .attr('class', 'card')
+            .append('xhtml:div')
+            .append("div")
+            .attr("class", "file")
+            .append("p")
+            .html(d => d.data.file)
+    }
+</script>
+</body>
+</html>
