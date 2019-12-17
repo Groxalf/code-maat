@@ -11,17 +11,19 @@ app.engine('mustache', mustacheExpress());
 app.set('view engine', 'mustache');
 app.set('views', __dirname + '/templates');
 
-app.get('/coupling', async (req, res) => {
-    res.render("coupling.mustache", {files: JSON.stringify(await retrieveCoupledClasses())})
+app.get('/coupling/:app_name', async (req, res) => {
+    const appName = req.params['app_name'];
+    res.render("coupling.mustache", {files: JSON.stringify(await retrieveCoupledClasses(appName))})
 });
 
-app.get('/revisions', async (req, res) => {
+app.get('/revisions/:app_name', async (req, res) => {
+    const appName = req.params['app_name'];
     async function parseRevisions() {
         return [{
             file: "parent",
             parent: "",
             revisions: 0
-        }, ...(await retrieveRevision({minRevisions: 20})).map(c => ({...c, parent: "parent"}))];
+        }, ...(await retrieveRevision({appName, minRevisions: 20})).map(c => ({...c, parent: "parent"}))];
     }
     res.render("revisions.mustache", {files: JSON.stringify(await parseRevisions())})
 });
@@ -43,10 +45,10 @@ function getFileName(path) {
     return path.substr(path.lastIndexOf("/") + 1, path.length);
 }
 
-function retrieveRevision({minRevisions = 0}: { minRevisions: number }): Promise<Array<{ file: string; revisions: number }>> {
+function retrieveRevision({appName, minRevisions = 0}: { appName: string, minRevisions: number }): Promise<Array<{ file: string; revisions: number }>> {
     return new Promise((resolve => {
         csv()
-            .fromFile("results/revision.csv")
+            .fromFile(`results/${appName}/revision.csv`)
             .then(json => json.map(it => (
                 {
                     file: getFileName(it.entity),
@@ -58,10 +60,10 @@ function retrieveRevision({minRevisions = 0}: { minRevisions: number }): Promise
     }));
 }
 
-function retrieveCoupledClasses(): Promise<Array<{ file: string, coupled: Array<{ file: string, coupledFile: string, degree: string, path: string }> }>> {
+function retrieveCoupledClasses(appName: string): Promise<Array<{ file: string, coupled: Array<{ file: string, coupledFile: string, degree: string, path: string }> }>> {
     return new Promise((resolve) => {
         csv()
-            .fromFile("results/coupling.csv")
+            .fromFile(`results/${appName}/coupling.csv`)
             .then(json =>
                 json.map(it => ({
                     file: getFileName(it.entity),
