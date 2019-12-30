@@ -2,7 +2,6 @@ version: '3.7'
 
 services:
   maat:
-    build:
-      context: .
+    build: https://github.com/adamtornhill/code-maat.git
     volumes: 
       - ./data:/data

@@ -4,7 +4,7 @@ const csv = require("csvtojson");
 const _ = require('lodash');
 const express = require('express');
 
-const PORT = 8001;
+const PORT = process.env.PORT;
 
 const app = express();
 app.engine('mustache', mustacheExpress());

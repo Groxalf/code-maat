@@ -24,7 +24,7 @@ download-app: clean
 	git clone ${APP_REPO} ${APP_NAME}
 	export FIRST_COMMIT_DATE=$(cd ${APP_NAME} && git log --reverse --pretty='%ad' --date=format:'%Y/%m/%d' | sed -n 1p)
 	mkdir -p data/${APP_NAME}
-	cd ${APP_NAME} && git log --pretty=format:'[%h] %aN %ad %s' --date=short --numstat --after=${FIRST_COMMIT_DATE} --no-renames -- . ":(exclude).*" ":(exclude)pom.xml" ":(exclude)*.txt" ":(exclude)*.js" ":(exclude)*.css" ":(exclude)*.properties" > ../data/${APP_NAME}/${APP_NAME}.log
+	cd ${APP_NAME} && git log --pretty=format:'[%h] %aN %ad %s' --date=short --numstat --after=${FIRST_COMMIT_DATE} --no-renames -- . ":(exclude)pom.xml" ":(exclude)*.txt" ":(exclude)*.js" ":(exclude)*.css" ":(exclude)*.properties" > ../data/${APP_NAME}/${APP_NAME}.log
 	make clean
 
 clean:

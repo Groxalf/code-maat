@@ -1,15 +1,15 @@
-FROM clojure:alpine AS build
-VOLUME /data
-LABEL description="code-maat docker image."
+FROM node:12.14.0-alpine3.11
 
-ARG dest=/usr/src/code-maat
+ENV PORT=8001
 
-RUN mkdir -p $dest
-WORKDIR $dest
-COPY project.clj $dest
-RUN lein deps
-COPY . $dest
-RUN mv "$(lein uberjar | sed -n 's/^Created \(.*standalone\.jar\)/\1/p')" app-standalone.jar
+RUN mkdir /app
+WORKDIR /app
 
-ENTRYPOINT ["java", "-jar", "app-standalone.jar"]
-CMD []
+COPY package.json .
+COPY package-lock.json .
+
+RUN npm install
+
+COPY . .
+
+CMD ["npm", "start"]

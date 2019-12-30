@@ -20,4 +20,3 @@ test_data.txt
 *.iml
 .nrepl-port
 node_modules/
-data/
