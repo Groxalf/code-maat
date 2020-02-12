@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node frontend/app.ts"
+    "start": "PORT=8085 ts-node frontend/app.ts"
   },
   "repository": {
     "type": "git",
