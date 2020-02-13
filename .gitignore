@@ -21,3 +21,4 @@ test_data.txt
 .nrepl-port
 node_modules/
 data/
+apps/
